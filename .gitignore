@@ -1,2 +1,7 @@
 data/
 .history/
+sim_build/
+Results/
+*.xml
+*.json
+*.pyc
