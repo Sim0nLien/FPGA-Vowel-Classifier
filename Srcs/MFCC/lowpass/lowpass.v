@@ -1,6 +1,3 @@
-
-
-
 module lowpass #(
     parameter Q_IN  = 15,
     parameter Q_OUT = 15

@@ -3,5 +3,9 @@ data/
 sim_build/
 Results/
 *.xml
-*.json
+*.vscode
 *.pyc
+*.vcd
+*.vcd.*
+*.mem
+*.json
