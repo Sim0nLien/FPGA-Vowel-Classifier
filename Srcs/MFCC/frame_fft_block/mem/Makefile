@@ -1,6 +1,7 @@
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 VERILOG_SOURCES = mem.v
+
 TOPLEVEL = mem
 MODULE = test_mem
 

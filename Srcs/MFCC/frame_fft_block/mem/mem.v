@@ -1,4 +1,7 @@
-module window #(
+// A rendre un peu plus robuste pour les sorties
+
+
+module mem #(
     parameter Q_DATA = 15,
     parameter N      = 256
 )(
@@ -68,5 +71,8 @@ module window #(
             end
         end
     end
-
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1, mem);
+  end
 endmodule

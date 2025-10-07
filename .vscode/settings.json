@@ -1,6 +1,11 @@
 {
     "cSpell.words": [
+        "coeff",
+        "localparam",
+        "lowpass",
         "mfcc",
-        "mfccs"
+        "mfccs",
+        "mult",
+        "posedge"
     ]
 }
