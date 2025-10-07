@@ -11,7 +11,8 @@ module window #(
     input wire signed [Q_IN:0] data_in,
     output reg valid_request,
     output reg valid_out,
-    output reg signed [Q_OUT:0] data_out
+    output reg signed [Q_OUT:0] data_out_0,
+    output reg signed [Q_OUT:0] data_out_1
 );
 
     localparam INIT =    3'b000;
@@ -26,9 +27,12 @@ module window #(
     reg signed [Q_COEFF:0] window_coeff [0:N-1];
     reg signed [Q_IN:0] data ;
 
-    reg signed [Q_IN + Q_COEFF + 1:0] tmp ;
+    reg signed [Q_IN + Q_COEFF + 1:0] tmp_0 ;
+    reg signed [Q_IN + Q_COEFF + 1:0] tmp_1 ;
 
     reg [7:0] counter;
+
+    reg [1:0] flag;
 
     initial begin
         $readmemh("window_hamming.mem", window_coeff);
@@ -39,11 +43,14 @@ module window #(
         if (reset) begin
             state     <= INIT;
             valid_out <= 1'b0;
-            data_out  <= '0;
+            data_out_0  <= '0;
+            data_out_1  <= '0;
             counter   <= 0;
             data      <= '0;
             valid_request <= 1'b0;
-            tmp       <= '0;
+            tmp_0       <= '0;
+            tmp_1       <= '0;
+            flag      <= 1'b0;
         end
         else begin
             case (state)
@@ -68,12 +75,20 @@ module window #(
                 end
                 COMPUTE: begin
                     valid_request <= 1'b0;
-                    tmp <= (data * window_coeff[counter]);
-                    state <= SEND;
+                    if (flag == 0) begin
+                        tmp_0 <= (data * window_coeff[counter]);
+                        flag <= 1'b1;
+                    end
+                    else begin
+                        tmp_1 <= (data * window_coeff[N - counter - 1]);
+                        flag <= 1'b0;
+                        state <= SEND;
+                    end
                 end
                 SEND: begin
                     valid_out <= 1'b1;
-                    data_out <= (tmp >>> Q_COEFF);
+                    data_out_0 <= (tmp_0 >>> Q_COEFF);
+                    data_out_1 <= (tmp_1 >>> Q_COEFF);
                     if (counter == N-1) begin
                         state <= DONE;
                     end

@@ -26,8 +26,11 @@ test_1 = np.random.randint(0, 2**15, size=256)
 
 adapted_hamming = adapt(hamming_value, Q)
 
-result_list = []
-expected_list = []
+result_0_list = []
+result_1_list = []
+
+expected_0_list = []
+expected_1_list = []
 
 
 @cocotb.test()
@@ -79,23 +82,36 @@ async def test_window(dut):
         await with_timeout(RisingEdge(dut.valid_out), 100, 'ns')
         await RisingEdge(dut.clk)
 
-        print("data out : ", dut.data_out.value)
+        print("data out : ", dut.data_out_0.value, dut.data_out_1.value)
 
-        result = dut.data_out.value.signed_integer
+        result_0 = dut.data_out_0.value.signed_integer
+        result_1 = dut.data_out_1.value.signed_integer
 
-        expected = test_1[i] * adapted_hamming[i] / (2 ** Q)
-        print(test_1[i], adapted_hamming[i])
-        print(f"Expected: {expected}, Got: {result}")
+        expected_0 = test_1[i] * adapted_hamming[i] / (2 ** Q)
+        expected_1 = test_1[i] * adapted_hamming[256 - i - 1] / (2 ** Q)
+
         
-        result_list.append(result)
-        expected_list.append(expected)
+        print(test_1[i], adapted_hamming[i])
+        print(f"Expected: {expected_0}, Got: {result_0}")
+        print(f"Expected: {expected_1}, Got: {result_1}")
 
-    
-    metric = MSE_np(result_list, expected_list)
-    print(f"MSE: {metric}")
-    assert metric < 5, f"MSE too high: {metric}"
-    plt.plot(result_list, label = "result")
-    plt.plot(expected_list, label = "expected")
+
+        result_0_list.append(result_0)
+        result_1_list.append(result_1)
+
+        expected_0_list.append(expected_0)
+        expected_1_list.append(expected_1)
+
+
+    metric_0 = MSE_np(result_0_list, expected_0_list)
+    metric_1 = MSE_np(result_1_list, expected_1_list)
+
+    print(f"MSE: {metric_0} and {metric_1}")
+    assert metric_0 < 5 and metric_1 < 5, f"MSE too high: {metric_0}"
+    plt.plot(np.arange(len(result_0_list)), result_0_list, label = "result_0")
+    plt.plot(np.arange(len(expected_0_list)), expected_0_list, label = "expected_0")
+    plt.plot(np.arange(256, 256 + len(result_1_list)), result_1_list, label = "result_1")
+    plt.plot(np.arange(256, 256 + len(expected_1_list)), expected_1_list, label = "expected_1")
     plt.legend()
     plt.show()
 
