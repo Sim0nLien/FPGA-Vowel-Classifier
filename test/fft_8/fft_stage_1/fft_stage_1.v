@@ -9,13 +9,11 @@ module fft_stage_1#(
     input wire valid_in,
     input wire valid_packet,
     input wire signed [Q_IN:0] data_in_real,
-    input wire signed [Q_IN:0] data_in_imag,
 
     output reg valid_request,
     output reg valid_out,
     output reg [3:0] addr_out,
     output reg signed [Q_OUT:0] data_out_real,
-    output reg signed [Q_OUT:0] data_out_imag,
     output reg signed [Q_OUT:0] coeff_out_real,
     output reg signed [Q_OUT:0] coeff_out_imag
     );
@@ -46,21 +44,16 @@ module fft_stage_1#(
         coeff[1] = -1;
     end
 
-    
-    reg signed [Q_IN:0] tmp_0 = 0;
-    reg signed [Q_IN:0] tmp_1 = 0;
+   
 
     reg [3:0] counter = 0;
 
     always @(posedge clk)
     begin
         if (reset) begin
-            tmp_0 = 0;
-            tmp_1 = 0;
             state = INIT;
             valid_out = 0;
             data_out_real = 0;
-            data_out_imag = 0;
             coeff_out_real = 0;
             coeff_out_imag = 0;
             valid_request = 0;
@@ -82,7 +75,6 @@ module fft_stage_1#(
                     valid_request = 0;
                     if (valid_in) begin
                         data_out_real = data_in_real;
-                        data_out_imag = data_in_imag;
                         coeff_out_real = coeff[0];
                         coeff_out_imag = coeff[1];
                         valid_out = 1;

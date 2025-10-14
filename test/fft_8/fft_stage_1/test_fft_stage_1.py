@@ -15,7 +15,6 @@ async def test_fft_stage_1(dut):
     dut.valid_in.value = 0
     dut.valid_packet.value = 0
     dut.data_in_real.value = 0
-    dut.data_in_imag.value = 0
 
     # Reset pendant quelques cycles
     for _ in range(3):
@@ -27,7 +26,6 @@ async def test_fft_stage_1(dut):
     # ---- Envoi d’un premier paquet ----
     # Simulation d’un bloc de données valides avec un valid_packet actif
     test_data_real = [0, 1, 2, 3]
-    test_data_imag = [8, 9, 10, 11]
 
     await RisingEdge(dut.clk)
     await RisingEdge(dut.clk)
@@ -47,7 +45,6 @@ async def test_fft_stage_1(dut):
 
         dut.valid_in.value = 1
         dut.data_in_real.value = test_data_real[i]
-        dut.data_in_imag.value = test_data_imag[i]
         await RisingEdge(dut.clk)
         dut.valid_in.value = 0
         
