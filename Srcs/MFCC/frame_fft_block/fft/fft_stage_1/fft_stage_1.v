@@ -2,7 +2,7 @@
 module fft_stage_1#(
     parameter Q_IN  = 15,
     parameter Q_OUT = 15,
-    parameter N     = 8
+    parameter N     = 256
 )(
     input wire clk,
     input wire reset,
@@ -27,18 +27,11 @@ module fft_stage_1#(
 
     reg signed [Q_IN:0] data_list [0:7];
 
-    initial begin
-        data_list[0] = 0;
-        data_list[1] = 4;
-        data_list[2] = 2;
-        data_list[3] = 6;
-        data_list[4] = 1;
-        data_list[5] = 5;
-        data_list[6] = 3;
-        data_list[7] = 7;
-    end
-
     reg [3:0] counter = 0;
+
+    initial begin
+        $readmemh("fft_stage_2/imag.mem", coeff_imag);
+    end
 
     always @(posedge clk)
     begin
@@ -60,7 +53,6 @@ module fft_stage_1#(
                 REQUEST : begin
                     valid_request = 1;
                     state = WAITING_2;
-                    addr_out = 
                 end
                 WAITING_2 : begin
                     valid_request = 0;

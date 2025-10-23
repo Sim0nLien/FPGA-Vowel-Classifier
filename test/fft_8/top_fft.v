@@ -2,7 +2,7 @@ module top_fft#(
     parameter Q_IN = 15,
     parameter Q_DATA = 15,
     parameter Q_OUT = 15,
-    parameter N = 256
+    parameter N = 8
 )(
     input  wire clk,
     input  wire reset,
@@ -25,8 +25,6 @@ module top_fft#(
     reg [Q_OUT:0] data_real_stage_1_unit_1;
     reg [Q_OUT:0] data_imag_stage_1_unit_1;
 
-    reg [Q_OUT:0] coeff_real_stage_1_unit_1;
-    reg [Q_OUT:0] coeff_imag_stage_1_unit_1;
     
 
     fft_stage_1 #(
@@ -36,15 +34,13 @@ module top_fft#(
     )inst_fft_stage_1(
         .clk(clk),
         .reset(reset),
-        .valid_in(paquet_ready),
-        .valid_packet(valid_out),
+        .valid_in(valid_in),
+        .valid_packet(valid_packet),
         .data_in_real(data_in),
         .valid_request(valid_request),
-        .valid_out(valid_out),
+        .valid_out(valid_out_stage_1_unit_1),
         .addr_out(addr_out),
-        .data_out_real(data_real_stage_1_unit_1),
-        .coeff_out_real(coeff_real_stage_1_unit_1),
-        .coeff_out_imag(coeff_imag_stage_1_unit_1)
+        .data_out_real(data_real_stage_1_unit_1)
     );
 
 
@@ -64,8 +60,7 @@ module top_fft#(
         .valid_in(valid_out_stage_1_unit_1),
         .a_real(data_real_stage_1_unit_1),
         .b_real(data_real_stage_1_unit_1),
-        .W_real(coeff_real_stage_1_unit_1),
-        .W_imag(coeff_imag_stage_1_unit_1),
+        .valid_out(valid_out_butter_1_stage_2),
         .y0_real(data_real_0_butter_1_stage_2),
         .y0_imag(data_imag_0_butter_1_stage_2),
         .y1_real(data_real_1_butter_1_stage_2),
@@ -84,12 +79,13 @@ module top_fft#(
 
     fft_stage_2  #(
         .Q_IN(Q_IN),
+        .Q_DATA(Q_DATA),
         .Q_OUT(Q_OUT),
         .N(N)
     )inst_fft_stage_2(
         .clk(clk),
         .reset(reset),
-        .valid_in(open),
+        .valid_in(valid_out_butter_1_stage_2),
         .data_in_real_0(data_real_0_butter_1_stage_2),
         .data_in_imag_0(data_imag_0_butter_1_stage_2),
         .data_in_real_1(data_real_1_butter_1_stage_2),
@@ -144,6 +140,7 @@ module top_fft#(
 
     fft_stage_3  #(
         .Q_IN(Q_IN),
+        .Q_DATA(Q_DATA),
         .Q_OUT(Q_OUT),
         .N(N)
     )inst_fft_stage_3(
@@ -184,5 +181,9 @@ module top_fft#(
         .y1_real(data_fft_real_1),
         .y1_imag(data_fft_imag_1)
     );
+    initial begin
+        $dumpfile("dump.vcd");
+        $dumpvars(1, top_fft);
+    end
 
 endmodule
