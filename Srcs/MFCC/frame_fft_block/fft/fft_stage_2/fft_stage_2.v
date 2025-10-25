@@ -3,7 +3,7 @@ module fft_stage_2#(
     parameter Q_IN  = 15,
     parameter Q_DATA = 15,
     parameter Q_OUT = 15,
-    parameter N     = 8
+    parameter N     = 256
 )(
     input wire clk,
     input wire reset,
@@ -33,37 +33,27 @@ module fft_stage_2#(
 
     reg [2:0] state = INIT; 
 
-    reg signed [Q_IN:0] data_list_real [0:7];
-    reg signed [Q_IN:0] data_list_imag [0:7];
+    reg signed [Q_IN:0] data_list_real [0:N];
+    reg signed [Q_IN:0] data_list_imag [0:N];
 
-    reg signed [Q_IN:0] indice_list [0:7];
-    reg signed [Q_DATA:0] coeff_real [0:1];
-    reg signed[Q_DATA:0] coeff_imag [0:1];
+    reg signed [Q_IN:0] indice_list [0:N];
+    reg signed [Q_DATA:0] coeff_real [0:N];
+    reg signed[Q_DATA:0] coeff_imag [0:N];
 
     reg flag = 0;
 
     reg signed [10:0] test = N * 2 - 2;
 
     initial begin
-        indice_list[0] = 0;
-        indice_list[1] = 2;
-        indice_list[2] = 1;
-        indice_list[3] = 3;
-        indice_list[4] = 4;
-        indice_list[5] = 6;
-        indice_list[6] = 5;
-        indice_list[7] = 7;
-    end
-
-    initial begin
         $readmemh("fft_stage_2/real.mem", coeff_real);
         $readmemh("fft_stage_2/imag.mem", coeff_imag);
+        $readmemh("fft_stage_2/indice.mem", indice_list);
     end
     
     reg [1:0] idx = 0; 
-    reg [5:0] counter_get = 0;
-    reg [3:0] counter_send = 0;
-    reg [1:0] counter_wait = 0;
+    reg [9:0] counter_get = 0;
+    reg [8:0] counter_send = 0;
+    reg [8:0] counter_wait = 0;
 
     always @(posedge clk)
     begin
@@ -98,7 +88,7 @@ module fft_stage_2#(
                     end
                 end
                 GET: begin
-                    if (counter_get < N * 2 - 2) begin
+                    if (counter_get < N - 2) begin
                         counter_get <= counter_get + 2;
                         state <= WAIT_DATA;
                     end else begin

@@ -1,9 +1,9 @@
 
-module fft_stage_3#(
+module fft_stage_5#(
     parameter Q_IN  = 15,
     parameter Q_DATA = 15,
     parameter Q_OUT = 15,
-    parameter N     = 8
+    parameter N     = 256
 )(
     input wire clk,
     input wire reset,
@@ -33,38 +33,27 @@ module fft_stage_3#(
 
     reg [2:0] state = INIT; 
 
-    reg signed [Q_IN:0] data_list_real [0:7];
-    reg signed [Q_IN:0] data_list_imag [0:7];
+    reg signed [Q_IN:0] data_list_real [0:N];
+    reg signed [Q_IN:0] data_list_imag [0:N];
 
-    reg signed [Q_IN:0] indice_list [0:7];
-    reg signed [Q_DATA:0] coeff_real [0:3];
-    reg signed [Q_DATA:0] coeff_imag [0:3];
+    reg signed [Q_IN:0] indice_list [0:N];
+    reg signed [Q_DATA:0] coeff_real [0:N];
+    reg signed[Q_DATA:0] coeff_imag [0:N];
 
-    // TODO : valeur à déterminer
+    reg flag = 0;
 
-    initial begin
-        indice_list[0] = 0;
-        indice_list[1] = 2;
-        indice_list[2] = 4;
-        indice_list[3] = 6;
-        indice_list[4] = 1;
-        indice_list[5] = 3;
-        indice_list[6] = 5;
-        indice_list[7] = 7;
-    end
+    reg signed [10:0] test = N * 2 - 2;
 
     initial begin
-        $readmemh("fft_stage_3/real.mem", coeff_real);
-        $readmemh("fft_stage_3/imag.mem", coeff_imag);
+        $readmemh("fft_stage_5/real.mem", coeff_real);
+        $readmemh("fft_stage_5/imag.mem", coeff_imag);
+        $readmemh("fft_stage_5/indice.mem", indice_list);
     end
-
-    reg [3:0] counter_get = 0;
-    reg [3:0] counter_send = 0;
-    reg [1:0] counter_wait = 0;
-
-    reg [2:0] idx = 0;
-
-
+    
+    reg [1:0] idx = 0; 
+    reg [9:0] counter_get = 0;
+    reg [8:0] counter_send = 0;
+    reg [8:0] counter_wait = 0;
 
     always @(posedge clk)
     begin
@@ -80,8 +69,6 @@ module fft_stage_3#(
             data_out_imag_1 <= 0;
             coeff_out_real <= 0;
             coeff_out_imag <= 0;
-            idx <= 0;
-            
         end else begin
             case (state)
                 INIT: begin
@@ -90,7 +77,6 @@ module fft_stage_3#(
                     counter_wait <= 0;
                     valid_out <= 0;
                     state <= WAIT_DATA;
-                    idx <= 0;
                 end
                 WAIT_DATA: begin
                     if (valid_in) begin
@@ -102,15 +88,13 @@ module fft_stage_3#(
                     end
                 end
                 GET: begin
-                    if (counter_get < N / 2 + 1) begin
+                    if (counter_get < N - 2) begin
                         counter_get <= counter_get + 2;
                         state <= WAIT_DATA;
                     end else begin
+                        flag <= 1;
                         counter_get <= 0;
                         state <= SEND;
-                    end 
-                    if (idx == 4) begin
-                        idx <= 0;
                     end
                 end
                 SEND: begin
@@ -122,7 +106,7 @@ module fft_stage_3#(
                         data_out_imag_0 <= data_list_imag[counter_send];
                         data_out_real_1 <= data_list_real[counter_send + 1];
                         data_out_imag_1 <= data_list_imag[counter_send + 1];
-                        counter_wait <= counter_wait + 1;
+                        counter_wait <=  1;
                     end else if (counter_wait == 1) begin
                         idx <= idx + 1;
                         valid_out <= 0;
@@ -137,12 +121,15 @@ module fft_stage_3#(
                             state <= INIT;
                         end
                     end
+                    if (idx == 2) begin
+                        idx <= 0;
+                    end
                 end
             endcase
         end
     end
     initial begin
         // $dumpfile("dump.vcd");
-        $dumpvars(1, fft_stage_3);
+        $dumpvars(1, fft_stage_5);
     end
 endmodule

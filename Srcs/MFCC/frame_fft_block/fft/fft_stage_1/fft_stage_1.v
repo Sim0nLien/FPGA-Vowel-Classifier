@@ -25,21 +25,23 @@ module fft_stage_1#(
     
     reg [2:0] state = INIT; 
 
-    reg signed [Q_IN:0] data_list [0:7];
+    reg signed [8:0] data_list [0:N];
 
-    reg [3:0] counter = 0;
+    reg [8:0] counter_request = 0;
+    reg [8:0] counter = 0;
 
     initial begin
-        $readmemh("fft_stage_2/imag.mem", coeff_imag);
+        $readmemh("indice.mem", data_list);
     end
 
     always @(posedge clk)
+    
     begin
         if (reset) begin
-            state = INIT;
-            valid_out = 0;
-            data_out_real = 0;
-            valid_request = 0;
+            state <= INIT;
+            valid_out <= 0;
+            data_out_real <= 0;
+            valid_request <= 0;
         end else begin
             case (state)
                 INIT : begin
@@ -47,30 +49,31 @@ module fft_stage_1#(
                 end
                 WAITING_1 : begin
                     if (valid_packet) begin
-                        state = REQUEST;
+                        state <= REQUEST;
                     end
                 end
                 REQUEST : begin
-                    valid_request = 1;
-                    state = WAITING_2;
+                    valid_request <= 1;
+                    state <= WAITING_2;
+                    addr_out <= data_list[counter_request];
                 end
                 WAITING_2 : begin
-                    valid_request = 0;
+                    valid_request <= 0;
                     if (valid_in) begin
-                        data_out_real = data_in_real;
-                        valid_out = 1;
-                        state = SEND;
+                        data_out_real <= data_in_real;
+                        valid_out <= 1;
+                        state <= SEND;
                     end
                 end
 
                 SEND : begin
-                    valid_out = 0;
+                    valid_out <= 0;
                     if (counter == (N - 1)) begin
-                        counter = 0;
-                        state = INIT;
+                        counter <= 0;
+                        state <= INIT;
                     end else begin
-                        counter = counter + 1;
-                        state = REQUEST;
+                        counter <= counter + 1;
+                        state <= REQUEST;
                     end
                 end
             endcase

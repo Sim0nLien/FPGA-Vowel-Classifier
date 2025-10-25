@@ -20,11 +20,12 @@ def coeff_stage(N, stage):
 
 
 if __name__ == "__main__":
-    Q_data = 15
-    N = 8
-    stage = 2
 
-    PATH = f"../../test/fft_{N}/fft_stage_{stage + 1}/"
+    Q_data = 15
+    N = 256
+    stage = 7
+
+    PATH = f"../../Srcs/MFCC/frame_fft_block/fft/fft_stage_{stage + 1}/"
     os.makedirs(PATH, exist_ok=True)
 
     print(f"Generating FFT coefficients for N={N}, stage={stage + 1}...")

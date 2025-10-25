@@ -1,4 +1,5 @@
 # test_fft_stage_1.py
+import numpy as np
 import cocotb
 from cocotb.triggers import RisingEdge, Timer, with_timeout
 from cocotb.clock import Clock
@@ -23,19 +24,20 @@ async def test_fft_stage_1_basic(dut):
     await RisingEdge(dut.clk)
 
     # Données d'entrée simulées
-    data_real = [10, 20, 30, 40, 50, 60, 70, 80]
-    data_imag = [1, -1, 2, -2, 3, -3, 4, -4]
+    data_real = np.arange(0,256)
+    data_imag = np.arange(0,256)
 
     # Envoi des données
     dut._log.info("Envoi des données d’entrée...")
-    for i in range(4):
+    for i in range(256//2):
 
         await RisingEdge(dut.clk)
+        print(i)
 
-        dut.data_in_real_0.value = data_real[2 * i]
-        dut.data_in_imag_0.value = data_imag[2 * i]
-        dut.data_in_real_1.value = data_real[2 * i + 1]
-        dut.data_in_imag_1.value = data_imag[2 * i + 1]
+        dut.data_in_real_0.value = int(data_real[2 * i])
+        dut.data_in_imag_0.value = int(data_imag[2 * i])
+        dut.data_in_real_1.value = int(data_real[2 * i + 1])
+        dut.data_in_imag_1.value = int(data_imag[2 * i + 1])
 
         dut.valid_in.value = 1
         await RisingEdge(dut.clk)
