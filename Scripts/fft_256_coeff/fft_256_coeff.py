@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     Q_data = 15
     N = 256
-    stage = 7
+    stage = 6
 
     PATH = f"../../Srcs/MFCC/frame_fft_block/fft/fft_stage_{stage + 1}/"
     os.makedirs(PATH, exist_ok=True)

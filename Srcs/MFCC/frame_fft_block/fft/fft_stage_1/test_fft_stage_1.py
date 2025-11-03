@@ -52,6 +52,7 @@ async def test_fft_stage_1(dut):
         
         if i < len(test_data_real) - 1:
             await with_timeout(RisingEdge(dut.valid_request), 200, 'ns')
+
         await RisingEdge(dut.clk)
         await RisingEdge(dut.clk)
 

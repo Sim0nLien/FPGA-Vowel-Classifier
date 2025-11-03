@@ -1,9 +1,6 @@
-// A rendre un peu plus robuste pour les sorties
-
-
 module mem #(
     parameter Q_DATA = 15,
-    parameter N      = 256
+    parameter N      = 128
 )(
     input  wire clk,
     input  wire reset,
@@ -17,11 +14,20 @@ module mem #(
 
     reg signed [Q_DATA:0] memory_0 [0:N-1];
     reg signed [Q_DATA:0] memory_1 [0:N-1];
-
+    
     reg flag_in;
     reg flag_out;
     reg [$clog2(N)-1:0] counter_in;
     reg [$clog2(N)-1:0] counter_out;
+    
+    integer i; 
+
+    initial begin
+        for (i = 0; i <= 128; i = i + 1) begin
+          memory_0[i] = 16'h0000;
+          memory_1[i] = 16'h0000; 
+        end
+    end 
 
     always @(posedge clk or posedge reset) begin
         if (reset) begin

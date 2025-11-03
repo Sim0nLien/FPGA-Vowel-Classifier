@@ -2,7 +2,7 @@ module window #(
     parameter Q_IN  = 15,
     parameter Q_COEFF = 15, 
     parameter Q_OUT = 15,
-    parameter N     = 256
+    parameter N     = 128
 )(
     input wire clk,
     input wire reset,
@@ -35,7 +35,7 @@ module window #(
     reg [1:0] flag;
 
     initial begin
-        $readmemh("window_hamming.mem", window_coeff);
+        $readmemh("window/window_hamming.mem", window_coeff);
     end
 
     always @(posedge clk)
@@ -67,7 +67,7 @@ module window #(
                 end
                 REQUEST: begin
                     valid_out <= 1'b0;
-                    valid_request <= 1'b1;
+                    valid_request <= 1'b0;
                     if (valid_in) begin
                         state <= COMPUTE;
                         data <= data_in;
@@ -94,6 +94,7 @@ module window #(
                     end
                     else begin
                         counter <= counter + 1;
+                        valid_request <= 1'b1;
                         state <= REQUEST;
                     end
                 end

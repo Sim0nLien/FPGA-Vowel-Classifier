@@ -36,7 +36,9 @@ module fft_stage_6#(
     reg signed [Q_IN:0] data_list_real [0:N];
     reg signed [Q_IN:0] data_list_imag [0:N];
 
-    reg signed [Q_IN:0] indice_list [0:N];
+    reg signed [Q_IN:0] indice_list_in [0:N];
+    reg signed [Q_IN:0] indice_list_out [0:N];
+    
     reg signed [Q_DATA:0] coeff_real [0:N];
     reg signed[Q_DATA:0] coeff_imag [0:N];
 
@@ -45,12 +47,13 @@ module fft_stage_6#(
     reg signed [10:0] test = N * 2 - 2;
 
     initial begin
-        $readmemh("fft_stage_6/real.mem", coeff_real);
-        $readmemh("fft_stage_6/imag.mem", coeff_imag);
-        $readmemh("fft_stage_6/indice.mem", indice_list);
+        $readmemh("fft/fft_stage_6/real.mem", coeff_real);
+        $readmemh("fft/fft_stage_6/imag.mem", coeff_imag);
+        $readmemh("fft/fft_stage_6/indice_0.mem", indice_list_in);
+        $readmemh("fft/fft_stage_6/indice_1.mem", indice_list_out);
     end
     
-    reg [1:0] idx = 0; 
+    reg [6:0] idx = 0; 
     reg [9:0] counter_get = 0;
     reg [8:0] counter_send = 0;
     reg [8:0] counter_wait = 0;
@@ -80,10 +83,10 @@ module fft_stage_6#(
                 end
                 WAIT_DATA: begin
                     if (valid_in) begin
-                        data_list_real[indice_list[counter_get]] <= data_in_real_0;
-                        data_list_imag[indice_list[counter_get]] <= data_in_imag_0;
-                        data_list_real[indice_list[counter_get + 1]] <= data_in_real_1;
-                        data_list_imag[indice_list[counter_get + 1]] <= data_in_imag_1;
+                        data_list_real[indice_list_in[counter_get]] <= data_in_real_0;
+                        data_list_imag[indice_list_in[counter_get]] <= data_in_imag_0;
+                        data_list_real[indice_list_in[counter_get + 1]] <= data_in_real_1;
+                        data_list_imag[indice_list_in[counter_get + 1]] <= data_in_imag_1;
                         state <= GET;
                     end
                 end
@@ -102,10 +105,10 @@ module fft_stage_6#(
                         valid_out <= 1;
                         coeff_out_real <= coeff_real[idx];
                         coeff_out_imag <= coeff_imag[idx];
-                        data_out_real_0 <= data_list_real[counter_send];
-                        data_out_imag_0 <= data_list_imag[counter_send];
-                        data_out_real_1 <= data_list_real[counter_send + 1];
-                        data_out_imag_1 <= data_list_imag[counter_send + 1];
+                        data_out_real_0 <= data_list_real[indice_list_out[counter_send]];
+                        data_out_imag_0 <= data_list_imag[indice_list_out[counter_send]];
+                        data_out_real_1 <= data_list_real[indice_list_out[counter_send + 1]];
+                        data_out_imag_1 <= data_list_imag[indice_list_out[counter_send + 1]];
                         counter_wait <=  1;
                     end else if (counter_wait == 1) begin
                         idx <= idx + 1;
@@ -121,7 +124,7 @@ module fft_stage_6#(
                             state <= INIT;
                         end
                     end
-                    if (idx == 2) begin
+                    if (idx == 32) begin
                         idx <= 0;
                     end
                 end

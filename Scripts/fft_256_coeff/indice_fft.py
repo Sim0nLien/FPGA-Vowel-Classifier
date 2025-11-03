@@ -5,33 +5,37 @@ import os
 
 
 
-def indice_stage(n_stage, n_data):
-    ans = []
-    n_subdiv = n_data // (2**n_stage)
-    for i in range(n_subdiv):
-        for j in range(2**n_stage//2):
-            ans.append(j*2+2**n_stage*i)
-        for j in range(2**n_stage//2):
-            ans.append(j*2+1+2**n_stage*i)
-    return ans
+
+def complete_indice(nb_stage, N):
+    result = np.zeros((nb_stage, N//2, 2))
+    for stage in range(0, nb_stage):
+        count = 0
+        m = 2 ** (stage + 1)
+        half_m = m // 2        
+        for k in range(0, N, m):
+            for j in range(half_m):
+                result[stage, count, 0] = k+j
+                result[stage, count, 1] = k+j+half_m
+                count = count + 1
+        print(result[stage, :])
+    return result
 
 
 N = 256
-list_valeur = np.arange(0,256)
+result = complete_indice(8, 256)
 
 PATH = f"../../Srcs/MFCC/frame_fft_block/fft/"
 
-
+print("#run.... ")
 if __name__ == "__main__":
     print("end")
-    for i in range(2,9):
-        indice = indice_stage(i,256)
-        print(indice)
-
+    for stage in range(1,9):
         os.makedirs(PATH, exist_ok=True)
-
-        NAME_PATH_REAL = os.path.join(PATH, f"fft_stage_{i}/indice.mem")
-
-        with open(NAME_PATH_REAL, "w") as f:
-            for val in indice:
-                f.write(f"{int(val) & 0xFF:02X}\n")
+        for j in range(2):
+            NAME_PATH_REAL = os.path.join(PATH, f"fft_stage_{stage  + j}/indice_{1 - j}.mem")
+            with open(NAME_PATH_REAL, "w") as f:
+                for group in result[stage - 1]:
+                    val_1 = group[1]
+                    val_0 = group[0]
+                    f.write(f"{int(val_0) & 0xFF:02X}\n")
+                    f.write(f"{int(val_1) & 0xFF:02X}\n")

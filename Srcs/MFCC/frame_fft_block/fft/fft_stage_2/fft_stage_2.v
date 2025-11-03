@@ -45,12 +45,12 @@ module fft_stage_2#(
     reg signed [10:0] test = N * 2 - 2;
 
     initial begin
-        $readmemh("fft_stage_2/real.mem", coeff_real);
-        $readmemh("fft_stage_2/imag.mem", coeff_imag);
-        $readmemh("fft_stage_2/indice.mem", indice_list);
+        $readmemh("fft/fft_stage_2/real.mem", coeff_real);
+        $readmemh("fft/fft_stage_2/imag.mem", coeff_imag);
+        $readmemh("fft/fft_stage_2/indice_1.mem", indice_list);
     end
     
-    reg [1:0] idx = 0; 
+    reg [2:0] idx = 0; 
     reg [9:0] counter_get = 0;
     reg [8:0] counter_send = 0;
     reg [8:0] counter_wait = 0;

@@ -14,7 +14,7 @@ module butterfly_unit_no_imag #(
 );
 
 
-    wire signed [Q_IN+1:0] mult_real = b_real;
+    wire signed [Q_IN:0] mult_real = b_real;
 
     
     always @(posedge clk or posedge reset) begin

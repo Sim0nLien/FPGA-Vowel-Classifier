@@ -10,8 +10,9 @@ module top_fft#(
     input  wire valid_packet,
     input  wire signed [Q_IN:0] data_in,
     
+    output reg valid_request,
     output reg valid_out,
-    output reg [3:0] addr_out,
+    output reg [8:0] addr_out,
     output reg signed [Q_OUT:0] data_fft_real_0,
     output reg signed [Q_OUT:0] data_fft_imag_0,
     output reg signed [Q_OUT:0] data_fft_real_1,
@@ -22,8 +23,8 @@ module top_fft#(
 
     reg valid_out_stage_1_unit_1;
 
-    reg [Q_OUT:0] data_real_stage_1_unit_1;
-    reg [Q_OUT:0] data_imag_stage_1_unit_1;
+    reg [Q_OUT:0] data_real_0_stage_1_butter_1;
+    reg [Q_OUT:0] data_real_1_stage_1_butter_1;
 
     
 
@@ -40,7 +41,8 @@ module top_fft#(
         .valid_request(valid_request),
         .valid_out(valid_out_stage_1_unit_1),
         .addr_out(addr_out),
-        .data_out_real(data_real_stage_1_unit_1)
+        .data_out_real_0(data_real_0_stage_1_butter_1),
+        .data_out_real_1(data_real_1_stage_1_butter_1)
     );
 
 
@@ -58,8 +60,8 @@ module top_fft#(
         .clk(clk),
         .reset(reset),
         .valid_in(valid_out_stage_1_unit_1),
-        .a_real(data_real_stage_1_unit_1),
-        .b_real(data_real_stage_1_unit_1),
+        .a_real(data_real_0_stage_1_butter_1),
+        .b_real(data_real_1_stage_1_butter_1),
         .valid_out(valid_out_butter_1_stage_2),
         .y0_real(data_real_0_butter_1_stage_2),
         .y0_imag(data_imag_0_butter_1_stage_2),
