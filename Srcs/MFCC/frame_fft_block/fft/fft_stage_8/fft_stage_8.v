@@ -50,8 +50,8 @@ module fft_stage_8#(
     initial begin
         $readmemh("fft/fft_stage_8/real.mem", coeff_real);
         $readmemh("fft/fft_stage_8/imag.mem", coeff_imag);
-        $readmemh("fft/fft_stage_8/indice.mem", indice_list_in);
-        $readmemh("fft/fft_stage_8/indice.mem", indice_list_out);
+        $readmemh("fft/fft_stage_8/indice_0.mem", indice_list_in);
+        $readmemh("fft/fft_stage_8/indice_1.mem", indice_list_out);
     end
     
     reg [8:0] idx = 0; 

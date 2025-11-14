@@ -3,7 +3,7 @@ import os
 
 def adapt(value, Q_bits):
     scale = 2 ** Q_bits
-    return np.round(np.clip(value, -1, 1 - 1/scale) * scale).astype(np.int16)
+    return np.round(np.clip(value, -1, 1 - 1/scale) * scale)
 
 
 def coeff_stage(N, stage):
@@ -23,30 +23,32 @@ if __name__ == "__main__":
 
     Q_data = 15
     N = 256
-    stage = 6
+    for stage in range(1, 7):
+    
 
-    PATH = f"../../Srcs/MFCC/frame_fft_block/fft/fft_stage_{stage + 1}/"
-    os.makedirs(PATH, exist_ok=True)
+        PATH = f"../../Srcs/MFCC/frame_fft_block/fft/fft_stage_{stage + 1}/"
+        os.makedirs(PATH, exist_ok=True)
 
-    print(f"Generating FFT coefficients for N={N}, stage={stage + 1}...")
+        print(f"Generating FFT coefficients for N={N}, stage={stage + 1}...")
 
-    coeff = coeff_stage(N, stage)
-    coeff_real = adapt(coeff.real, Q_data)
-    coeff_imag = adapt(coeff.imag, Q_data)
+        coeff = coeff_stage(N, stage)
+        coeff_real = adapt(coeff.real, Q_data)
+        coeff_imag = adapt(coeff.imag, Q_data)
 
-    print("Re:", coeff_real)
-    print("Im:", coeff_imag)
+        print("Re:", coeff_real)
+        print("Im:", coeff_imag)
 
-    NAME_PATH_REAL = os.path.join(PATH, "real.mem")
-    with open(NAME_PATH_REAL, "w") as f:
-        for val in coeff_real:
-            f.write(f"{int(val) & 0xFFFF:04X}\n")
+        NAME_PATH_REAL = os.path.join(PATH, "real.mem")
+        with open(NAME_PATH_REAL, "w") as f:
+            for val in coeff_real:
+                f.write(f"{int(val) & 0xFFFF:04X}\n")
 
-    NAME_PATH_IMAG = os.path.join(PATH, "imag.mem")
-    with open(NAME_PATH_IMAG, "w") as f:
-        for val in coeff_imag:
-            f.write(f"{int(val) & 0xFFFF:04X}\n")
+        NAME_PATH_IMAG = os.path.join(PATH, "imag.mem")
+        with open(NAME_PATH_IMAG, "w") as f:
+            for val in coeff_imag:
+                f.write(f"{int(val) & 0xFFFF:04X}\n")
 
-    print("Files generated:")
-    print(" ", NAME_PATH_REAL)
-    print(" ", NAME_PATH_IMAG)
+        print("Files generated:")
+        print(" ", NAME_PATH_REAL)
+        print(" ", NAME_PATH_IMAG)
+

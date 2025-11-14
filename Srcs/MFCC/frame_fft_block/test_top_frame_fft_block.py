@@ -33,14 +33,19 @@ def traitement(signal, N, fs, group):
     signal_process = signal[frame] * hamming_data
     return np.fft.fftfreq(N, d = 1 / fs), np.fft.fft(signal_process)
 
-def post_traitement(signal, N, fs, number):
-    freqs = np.zeros(N)
-    for k in range(N):
-        if k <= N//2:
-            freqs[k] = k * fs / N
+def post_traitement(signal_0, signal_1, N, fs, number):
+    N = 128
+    freqs = np.zeros(N * 2)
+    for k in range(N * 2):
+        if k <= N:
+            freqs[k] = k * fs / (N * 2)
         else:
-            freqs[k] = (k - N) * fs / N
-    frames = signal[number * N:number * N + N] 
+            freqs[k] = (k - (2 * N)) * fs / (N * 2)
+    frames = signal_0[number * N : number * N + N] + signal_1[number * N : number * N + N]
+    plt.plot(signal_0[number * N : number * N + N])
+    plt.plot(signal_1[number * N : number * N + N])
+    plt.plot(freqs)
+    plt.show()
     return freqs, frames
 
 def cos_entier(freq, fs=8000, N=256):
@@ -61,6 +66,12 @@ N = 256
 
 result_real_list = []
 result_imag_list = []
+
+result_real_list_0 = []
+result_imag_list_0 = []
+result_real_list_1 = []
+result_imag_list_1 = []
+
 expected_0_list = []
 expected_1_list = []
 
@@ -88,7 +99,7 @@ async def driver(dut, signal):
     dut._log.info("Driver: envoi terminé.")
 
 
-async def receiver(dut, result_0_list, result_1_list):
+async def receiver(dut, result_real_list_0, result_real_list_1, result_imag_list_0, result_imag_list_1):
     while True:
         await RisingEdge(dut.clk)
         if dut.valid_out.value:
@@ -96,10 +107,10 @@ async def receiver(dut, result_0_list, result_1_list):
             val_real_1 = int(dut.data_fft_real_1.value.signed_integer)
             val_imag_0 = int(dut.data_fft_imag_0.value.signed_integer)
             val_imag_1 = int(dut.data_fft_imag_1.value.signed_integer)
-            result_real_list.append(val_real_0)
-            result_real_list.append(val_real_1)
-            result_imag_list.append(val_imag_0)
-            result_imag_list.append(val_imag_1)
+            result_real_list_0.append(val_real_0)
+            result_real_list_1.append(val_real_1)
+            result_imag_list_0.append(val_imag_0)
+            result_imag_list_1.append(val_imag_1)
             # dut._log.info(f"Receiver: reçu val_real_0 = {val_real_0}, val_real_1 = {val_real_1}, val_imag_0 = {val_imag_0}, val_imag_1 = {val_imag_1}")
 
 
@@ -118,14 +129,13 @@ async def test_window(dut):
     await RisingEdge(dut.clk)
 
     cocotb.start_soon(driver(dut, signal))
-    cocotb.start_soon(receiver(dut, result_real_list, result_imag_list))
+    cocotb.start_soon(receiver(dut, result_real_list_0, result_real_list_1, result_imag_list_0, result_imag_list_1))
 
     for _ in range(15000):
         await RisingEdge(dut.clk)
-
-
-    x_freq, post_result_real = post_traitement(result_real_list, N, fs, 4)
-    _ , post_result_imag = post_traitement(result_imag_list, N, fs, 4)
+    
+    x_freq, post_result_real = post_traitement(result_real_list_0,result_real_list_1 , N, fs, 4)
+    _ , post_result_imag = post_traitement(result_imag_list_0,result_imag_list_1, N, fs, 4)
     # print(len())
     # print(len())
     plt.plot(x_result, np.real(y_result))
@@ -133,5 +143,11 @@ async def test_window(dut):
     # plt.plot(x_freq, np.array(post_result_imag)[indice_end])
     plt.show()
     print(indice_end)
+    print(len(result_real_list))
+    print(len(result_real_list_0))
+    print(len(result_real_list_1))
+        
 
 
+save_tab = np.stack((np.array(signal), np.arange(0,len(signal))))
+np.savetxt("mon_tableau.csv", save_tab, delimiter=",", fmt="%d")

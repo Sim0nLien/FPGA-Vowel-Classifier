@@ -29,8 +29,8 @@ module mem_1 #(
         end
     end 
 
-    reg [$clog2(N):0] counter_in;
-    reg [$clog2(N):0] counter_out;
+    reg [$clog2(N)+1:0] counter_in;
+    reg [$clog2(N)+1:0] counter_out;
     reg [1:0] counter_mem_in;
     reg [1:0] counter_mem_out;
 
@@ -95,7 +95,7 @@ module mem_1 #(
                 
                 valid_out <= 1'b1;
 
-                if (counter_out == 255) begin
+                if (counter_out == 257) begin
                     counter_out <= 0;
                     counter_mem_out <= counter_mem_out + 1;
                     if (counter_mem_out == 2'b10) begin
