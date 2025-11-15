@@ -84,6 +84,9 @@ list_result[0, :] = list_result[0, mix_init]
 list_coeff = coeff_stage(N, nb_stage)
 list_coeff = adapt(list_coeff, 15)
 
+x_scale = np.arange(0,256)
+x_scale = x_scale / max(x_scale) * fs
+
 plt.plot(signal)
 
 for i in range(nb_stage):
@@ -98,7 +101,7 @@ for i in range(nb_stage):
             print("k :", k, list_result[i , idx_0], list_result[i, idx_1], list_coeff[i, k])
             print("k :", k, list_result[i + 1, idx_0], list_result[i + 1, idx_1])
     # if i == nb_stage - 1 :
-    plt.plot(list_result[i + 1,:], label = f'{i}')
+    plt.plot(x_scale, list_result[i + 1,:], label = f'{i}')
 
 np.savetxt("coeff.csv", list_coeff, delimiter=",", fmt="%d")
 np.savetxt("mon_tableau.csv", list_result, delimiter=",", fmt="%d")

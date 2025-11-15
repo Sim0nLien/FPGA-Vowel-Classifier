@@ -14,25 +14,27 @@ module butterfly_unit #(
     output reg signed [Q_OUT:0]  y1_real, y1_imag
 );
 
-    wire signed [Q_IN+Q_DATA+1:0] mult_real = b_real * W_real - b_imag * W_imag;
-    wire signed [Q_IN+Q_DATA+1:0] mult_imag = b_real * W_imag + b_imag * W_real;
+
+    wire signed [Q_IN+Q_DATA+1:0] mult_real = 
+        b_real * W_real - b_imag * W_imag;
+
+    wire signed [Q_IN+Q_DATA+1:0] mult_imag = 
+        b_real * W_imag + b_imag * W_real;
 
     wire signed [Q_OUT:0] bw_real = mult_real >>> Q_DATA;
     wire signed [Q_OUT:0] bw_imag = mult_imag >>> Q_DATA;
 
-    function signed [Q_OUT:0] sat_add;
-        input signed [Q_OUT:0] a, b;
-        reg signed [Q_OUT+1:0] sum;
+
+    function signed [Q_OUT:0] add_round;
+        input signed [Q_OUT:0] x, y;
+
+        reg signed [Q_OUT+2:0] sum_guard;
     begin
-        sum = a + b;
-        if (sum >  $signed({1'b0, {Q_OUT{1'b1}}}))
-            sat_add = $signed({1'b0, {Q_OUT{1'b1}}});
-        else if (sum < $signed({1'b1, {Q_OUT{1'b0}}}))
-            sat_add = $signed({1'b1, {Q_OUT{1'b0}}});
-        else
-            sat_add = sum[Q_OUT:0];
+        sum_guard = x + y;
+        add_round = sum_guard[Q_OUT:0] + sum_guard[Q_OUT+1];
     end
     endfunction
+
 
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -43,10 +45,10 @@ module butterfly_unit #(
             valid_out <= 0;
         end 
         else if (valid_in) begin
-            y0_real   <= sat_add(a_real,  bw_real);
-            y0_imag   <= sat_add(a_imag,  bw_imag);
-            y1_real   <= sat_add(a_real, -bw_real);
-            y1_imag   <= sat_add(a_imag, -bw_imag);
+            y0_real   <= add_round(a_real,  bw_real);
+            y0_imag   <= add_round(a_imag,  bw_imag);
+            y1_real   <= add_round(a_real, -bw_real);
+            y1_imag   <= add_round(a_imag, -bw_imag);
             valid_out <= 1;
         end 
         else begin

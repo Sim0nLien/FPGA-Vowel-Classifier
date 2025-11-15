@@ -22,7 +22,7 @@ def complete_indice(nb_stage, N):
 def adapt(value, Q_bits):
     scale = 2 ** Q_bits
     return np.round(np.clip(value, -1, 1 - 1/scale) * scale).astype(np.int16)
-
+ 
 def MSE_np(pred, target):
     return np.square(np.subtract(pred, target)).mean()
 
@@ -42,10 +42,7 @@ def post_traitement(signal_0, signal_1, N, fs, number):
         else:
             freqs[k] = (k - (2 * N)) * fs / (N * 2)
     frames = signal_0[number * N : number * N + N] + signal_1[number * N : number * N + N]
-    plt.plot(signal_0[number * N : number * N + N])
-    plt.plot(signal_1[number * N : number * N + N])
-    plt.plot(freqs)
-    plt.show()
+    print(frames)
     return freqs, frames
 
 def cos_entier(freq, fs=8000, N=256):
@@ -60,7 +57,7 @@ def cos_entier(freq, fs=8000, N=256):
 fs = 40e3
 
 Q = 15
-signal = cos_entier(1000, fs, 1000)
+signal = cos_entier(3000, fs, 1000)
 
 N = 256
 
@@ -77,8 +74,7 @@ expected_1_list = []
 
 list_indice = complete_indice(8, 256)
 
-indice_end = list_indice[7]
-indice_end = indice_end.reshape(1, 256)[0].astype(int)
+
 print(signal)
 print(len(signal))
 x_result, y_result =  traitement(signal, N, fs, 3)
@@ -136,17 +132,19 @@ async def test_window(dut):
     
     x_freq, post_result_real = post_traitement(result_real_list_0,result_real_list_1 , N, fs, 4)
     _ , post_result_imag = post_traitement(result_imag_list_0,result_imag_list_1, N, fs, 4)
+    # print(len())m
     # print(len())
-    # print(len())
-    plt.plot(x_result, np.real(y_result))
-    plt.plot(x_freq, np.array(post_result_real)[indice_end])
+    plt.plot(x_result, np.real(y_result), '*-', label = 'theo')
+    plt.plot(x_freq, np.array(post_result_real), '*-', label = 'prac')
     # plt.plot(x_freq, np.array(post_result_imag)[indice_end])
+    plt.legend()
     plt.show()
     print(indice_end)
     print(len(result_real_list))
     print(len(result_real_list_0))
     print(len(result_real_list_1))
-        
+    print(x_result, y_result)
+    print(len(result_real_list_0))
 
 
 save_tab = np.stack((np.array(signal), np.arange(0,len(signal))))
